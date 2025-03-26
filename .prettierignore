@@ -1,0 +1,27 @@
+# Build output
+dist/
+
+# Node modules
+node_modules/
+
+# Coverage reports
+coverage/
+
+# Config files
+*.json
+*.yml
+*.yaml
+
+# Markdown files
+*.md
+
+# Environment variables
+.env
+.env.*
+
+# Editor files
+.vscode/
+.idea/
+
+# Other
+.DS_Store
