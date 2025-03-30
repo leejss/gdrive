@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { program } from 'commander';
 import { uploadCommand } from './commands/upload.js';
 import { listCommand } from './commands/list.js';
@@ -8,10 +6,12 @@ import { downloadCommand } from './commands/download.js';
 import { authCommand } from './commands/auth.js';
 import { shareCommand } from './commands/share.js';
 import { removeCommand } from './commands/remove.js';
-import { version } from '../package.json';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Setup the CLI program
-program.name('gup').description('Google Drive Command Line Uploader').version(version);
+program.name('gd-up').description('Google Drive Command Line Uploader').version('1.0.0');
 
 // Register commands
 uploadCommand(program);

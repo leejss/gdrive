@@ -5,9 +5,9 @@
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "strict": true,
-    "outDir": "./dist",
+    "outDir": ".types",
     "declaration": true,
-    "sourceMap": true,
+    "emitDeclarationOnly": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {

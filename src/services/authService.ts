@@ -1,9 +1,9 @@
-import { google } from 'googleapis';
-import { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client, type Credentials } from 'google-auth-library';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import * as open from 'open';
+import * as http from 'http';
 import { Config } from '../config/config.js';
 
 export class AuthService {
@@ -13,51 +13,65 @@ export class AuthService {
     'https://www.googleapis.com/auth/drive.metadata',
   ];
 
-  private readonly CREDENTIALS_DIR = path.join(os.homedir(), '.gup');
+  private readonly CREDENTIALS_DIR = path.join(os.homedir(), '.gd-up-credentials');
   private readonly TOKEN_PATH = path.join(this.CREDENTIALS_DIR, 'token.json');
   private readonly CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
   private readonly CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
   private readonly REDIRECT_URI = 'http://localhost:3000/oauth2callback';
-
-  private config: Config;
+  private oauthClient: OAuth2Client | null = null;
+  // private config: Config;
 
   constructor() {
-    this.config = new Config();
+    // this.config = new Config();
 
     // Ensure credentials directory exists
     if (!fs.existsSync(this.CREDENTIALS_DIR)) {
       fs.mkdirSync(this.CREDENTIALS_DIR, { recursive: true });
+    }
+
+    // check env variables
+    if (!this.CLIENT_ID || !this.CLIENT_SECRET) {
+      throw new Error('CLIENT_ID and CLIENT_SECRET must be set');
     }
   }
 
   /**
    * Get OAuth2 client
    */
-  getAuthClient(): OAuth2Client {
-    const client = new google.auth.OAuth2(this.CLIENT_ID, this.CLIENT_SECRET, this.REDIRECT_URI);
+  async getAuthClient(): Promise<OAuth2Client> {
+    if (this.oauthClient) {
+      return this.oauthClient;
+    }
+
+    this.oauthClient = new OAuth2Client(this.CLIENT_ID, this.CLIENT_SECRET, this.REDIRECT_URI);
 
     // Check for existing token
     if (fs.existsSync(this.TOKEN_PATH)) {
       const token = JSON.parse(fs.readFileSync(this.TOKEN_PATH, 'utf8'));
-      client.setCredentials(token);
+
+      this.oauthClient.setCredentials(token);
+
+      if (this.isTokenExpired(token)) {
+        // refresh token
+        await this.refreshToken();
+      }
     }
 
-    return client;
+    return this.oauthClient;
   }
 
   /**
    * Start authentication process
    */
   async authenticate(): Promise<void> {
-    const client = this.getAuthClient();
+    const client = await this.getAuthClient();
 
-    // Check if already authenticated
     try {
       await client.getAccessToken();
-      // If we get here, token is valid
+      console.log('이미 인증되어 있습니다.');
       return;
     } catch (error) {
-      // Token is invalid or doesn't exist, continue with auth flow
+      console.log("Token is invalid or doesn't exist, continue with auth flow");
     }
 
     // Generate auth URL
@@ -80,44 +94,75 @@ export class AuthService {
    */
   private startCallbackServer(client: OAuth2Client): Promise<void> {
     return new Promise((resolve, reject) => {
-      const http = require('http');
-      const url = require('url');
+      const server = http.createServer(
+        async (req: http.IncomingMessage, res: http.ServerResponse) => {
+          try {
+            const reqUrl = req.url || '';
 
-      const server = http.createServer(async (req: any, res: any) => {
-        try {
-          if (req.url?.startsWith('/oauth2callback')) {
-            const queryParams = url.parse(req.url, true).query;
-            const code = queryParams.code;
+            if (reqUrl.startsWith('/oauth2callback')) {
+              const parsedUrl = new URL(reqUrl, `http://localhost`);
+              const code = parsedUrl.searchParams.get('code');
 
-            if (code) {
+              if (!code) {
+                throw new Error('No authorization code received');
+              }
               // Exchange code for tokens
-              const { tokens } = await client.getToken(code);
+              const { tokens } = await client.getToken(code as string);
               client.setCredentials(tokens);
 
               // Save token
               fs.writeFileSync(this.TOKEN_PATH, JSON.stringify(tokens));
 
               // Send success response
-              res.writeHead(200, { 'Content-Type': 'text/html' });
-              res.end(
-                '<h1>Authentication successful!</h1><p>You can close this window and return to the command line.</p>'
-              );
+              res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+              res.end(`
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <title>인증 성공</title>
+                    <style>
+                      body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                      h1 { color: #4CAF50; }
+                    </style>
+                  </head>
+                  <body>
+                    <h1>인증 성공!</h1>
+                    <p>이 창을 닫고 애플리케이션으로 돌아가세요.</p>
+                    <script>setTimeout(() => window.close(), 3000);</script>
+                  </body>
+                </html>
+              `);
 
               // Close server and resolve promise
               server.close();
               resolve();
-            } else {
-              throw new Error('No authorization code received');
             }
+          } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(`
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <title>인증 실패</title>
+                  <style>
+                    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                    h1 { color: #F44336; }
+                  </style>
+                </head>
+                <body>
+                  <h1>인증 실패</h1>
+                  <p>오류가 발생했습니다. 다시 시도해주세요.</p>
+                  <script>setTimeout(() => window.close(), 3000);</script>
+                </body>
+              </html>
+            `);
+            server.close();
+            reject(error);
           }
-        } catch (error) {
-          res.writeHead(500, { 'Content-Type': 'text/html' });
-          res.end('<h1>Authentication failed</h1><p>Please try again.</p>');
-          server.close();
-          reject(error);
         }
-      });
+      );
 
+      // TODO: get port from redirect uri
       server.listen(3000, () => {
         console.log('Waiting for authentication response...');
       });
@@ -126,6 +171,22 @@ export class AuthService {
         reject(error);
       });
     });
+  }
+
+  private isTokenExpired(credentials: Credentials): boolean {
+    if (!credentials.expiry_date) return true;
+    return credentials.expiry_date <= Date.now();
+  }
+
+  private async refreshToken(): Promise<void> {
+    const ressult = await this.oauthClient?.refreshAccessToken();
+    const credentials = ressult?.credentials;
+
+    if (!credentials) {
+      throw new Error('Failed to refresh token');
+    }
+
+    fs.writeFileSync(this.TOKEN_PATH, JSON.stringify(credentials, null, 2));
   }
 
   /**
