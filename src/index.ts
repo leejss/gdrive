@@ -10,10 +10,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Setup the CLI program
+/* -------------------------------------------------------------------------- */
+/*                              Setup CLI Program                             */
+/* -------------------------------------------------------------------------- */
 program.name('gd-up').description('Google Drive Command Line Uploader').version('1.0.0');
 
-// Register commands
+/* -------------------------------------------------------------------------- */
+/*                              Register Commands                             */
+/* -------------------------------------------------------------------------- */
 uploadCommand(program);
 listCommand(program);
 searchCommand(program);
@@ -22,9 +26,15 @@ authCommand(program);
 shareCommand(program);
 removeCommand(program);
 
+/* -------------------------------------------------------------------------- */
+/*                              Parse Command Line                            */
+/* -------------------------------------------------------------------------- */
 // Parse command line arguments
 program.parse(process.argv);
 
+/* -------------------------------------------------------------------------- */
+/*                              Display Help                                */
+/* -------------------------------------------------------------------------- */
 // Display help if no arguments provided
 if (process.argv.length === 2) {
   program.outputHelp();

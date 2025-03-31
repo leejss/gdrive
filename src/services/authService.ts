@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as os from 'os';
 import * as open from 'open';
 import * as http from 'http';
-import { Config } from '../config/config.js';
+// import { Config } from '../config/config.js';
 
 export class AuthService {
   private readonly SCOPES = [
@@ -20,6 +20,10 @@ export class AuthService {
   private readonly REDIRECT_URI = 'http://localhost:3000/oauth2callback';
   private oauthClient: OAuth2Client | null = null;
   // private config: Config;
+
+  static create(): AuthService {
+    return new AuthService();
+  }
 
   constructor() {
     // this.config = new Config();
@@ -179,8 +183,8 @@ export class AuthService {
   }
 
   private async refreshToken(): Promise<void> {
-    const ressult = await this.oauthClient?.refreshAccessToken();
-    const credentials = ressult?.credentials;
+    const result = await this.oauthClient?.refreshAccessToken();
+    const credentials = result?.credentials;
 
     if (!credentials) {
       throw new Error('Failed to refresh token');

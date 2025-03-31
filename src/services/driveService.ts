@@ -8,10 +8,15 @@ import { FileInfo } from '../types/fileTypes.js';
 export class DriveService {
   private drive: drive_v3.Drive;
 
-  constructor() {
-    const authService = new AuthService();
-    const auth = authService.getAuthClient();
-    this.drive = google.drive({ version: 'v3', auth });
+  static async create(): Promise<DriveService> {
+    const authService = AuthService.create();
+    const authClient = await authService.getAuthClient();
+    const drive = google.drive({ version: 'v3', auth: authClient });
+    return new DriveService(drive);
+  }
+
+  constructor(drive: drive_v3.Drive) {
+    this.drive = drive;
   }
 
   /**
