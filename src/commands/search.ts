@@ -13,7 +13,7 @@ export function searchCommand(program: Command): void {
     .option('-v, --verbose', 'Show detailed information')
     .action(async (query, options) => {
       const spinner = createSpinner(`Searching for "${query}" in Google Drive`);
-      const driveService = new DriveService();
+      const driveService = await DriveService.create();
 
       try {
         const files = await driveService.searchFiles(query, options.type);

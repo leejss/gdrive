@@ -13,7 +13,7 @@ export function shareCommand(program: Command): void {
     .option('--notify', 'Send notification email', true)
     .action(async (fileId, options) => {
       const spinner = createSpinner('Sharing file');
-      const driveService = new DriveService();
+      const driveService = await DriveService.create();
 
       try {
         // Validate role

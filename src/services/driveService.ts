@@ -22,13 +22,13 @@ export class DriveService {
   /**
    * Upload a file to Google Drive
    */
-  async uploadFile(filePath: string, folderId?: string, customName?: string): Promise<string> {
+  async uploadFile(filePath: string, folderId?: string): Promise<string> {
     // Verify file exists
     if (!fs.existsSync(filePath)) {
       throw new Error(`File "${filePath}" does not exist`);
     }
 
-    const fileName = customName || path.basename(filePath);
+    const fileName = path.basename(filePath);
     const mimeType = mime.lookup(filePath) || 'application/octet-stream';
 
     // Prepare request metadata
@@ -63,7 +63,6 @@ export class DriveService {
   async uploadDirectory(
     dirPath: string,
     parentFolderId?: string,
-    customName?: string,
     recursive: boolean = true
   ): Promise<string> {
     // Verify directory exists
@@ -75,7 +74,7 @@ export class DriveService {
       throw new Error(`"${dirPath}" is not a directory`);
     }
 
-    const dirName = customName || path.basename(dirPath);
+    const dirName = path.basename(dirPath);
 
     // Create folder in Google Drive
     const folderMetadata: drive_v3.Schema$File = {
@@ -105,7 +104,7 @@ export class DriveService {
 
       if (stat.isDirectory() && recursive) {
         // Recursively upload subdirectory
-        await this.uploadDirectory(filePath, folderId);
+        await this.uploadDirectory(filePath, folderId, recursive);
       } else if (stat.isFile()) {
         // Upload file
         await this.uploadFile(filePath, folderId);
@@ -127,6 +126,9 @@ export class DriveService {
     } else {
       query += "'root' in parents";
     }
+
+    // Exclude trashed files
+    query += ' and trashed = false';
 
     // Add file type filter if specified
     if (fileType) {
@@ -196,7 +198,7 @@ export class DriveService {
     const response = await this.drive.files.list({
       q: queryString,
       fields: 'files(id, name, mimeType, size, createdTime, modifiedTime, owners, shared)',
-      orderBy: 'name',
+      orderBy: 'modifiedTime desc',
     });
 
     const files = response.data.files || [];

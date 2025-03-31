@@ -11,7 +11,7 @@ export function removeCommand(program: Command): void {
     .description('Remove a file from Google Drive')
     .option('-f, --force', 'Skip confirmation', false)
     .action(async (fileId, options) => {
-      const driveService = new DriveService();
+      const driveService = await DriveService.create();
 
       try {
         // Get file details

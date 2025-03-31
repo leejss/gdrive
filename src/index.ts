@@ -23,8 +23,8 @@ listCommand(program);
 searchCommand(program);
 downloadCommand(program);
 authCommand(program);
-shareCommand(program);
 removeCommand(program);
+// shareCommand(program);
 
 /* -------------------------------------------------------------------------- */
 /*                              Parse Command Line                            */

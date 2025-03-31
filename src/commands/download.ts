@@ -15,7 +15,7 @@ export function downloadCommand(program: Command): void {
     .option('-n, --name <name>', 'Save the file with a different name')
     .action(async (fileId, options) => {
       const spinner = createSpinner('Downloading file from Google Drive');
-      const driveService = new DriveService();
+      const driveService = await DriveService.create();
       const config = new Config();
 
       try {
