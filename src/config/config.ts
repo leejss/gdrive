@@ -3,19 +3,19 @@ import * as path from 'path';
 import * as os from 'os';
 
 interface ConfigSchema {
-  defaultFolder?: string;
+  defaultFolderId?: string;
   defaultDownloadLocation?: string;
   verbose?: boolean;
 }
 
-export class Config {
+class Config {
   private conf: Conf<ConfigSchema>;
 
   constructor() {
     this.conf = new Conf<ConfigSchema>({
-      projectName: 'gup',
+      projectName: 'gd-up',
       schema: {
-        defaultFolder: {
+        defaultFolderId: {
           type: 'string',
         },
         defaultDownloadLocation: {
@@ -27,7 +27,7 @@ export class Config {
           default: false,
         },
       },
-      configName: '.guprc',
+      configName: '.gduprc',
     });
   }
 
@@ -55,3 +55,5 @@ export class Config {
     return this.conf.store;
   }
 }
+
+export const config = new Config();

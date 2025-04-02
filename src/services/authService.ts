@@ -19,15 +19,11 @@ export class AuthService {
   private readonly CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
   private readonly REDIRECT_URI = 'http://localhost:3000/oauth2callback';
   private oauthClient: OAuth2Client | null = null;
-  // private config: Config;
-
   static create(): AuthService {
     return new AuthService();
   }
 
   constructor() {
-    // this.config = new Config();
-
     // Ensure credentials directory exists
     if (!fs.existsSync(this.CREDENTIALS_DIR)) {
       fs.mkdirSync(this.CREDENTIALS_DIR, { recursive: true });
@@ -48,20 +44,16 @@ export class AuthService {
     }
 
     this.oauthClient = new OAuth2Client(this.CLIENT_ID, this.CLIENT_SECRET, this.REDIRECT_URI);
-
-    // Check for existing token
     if (fs.existsSync(this.TOKEN_PATH)) {
       const token = JSON.parse(fs.readFileSync(this.TOKEN_PATH, 'utf8'));
-
       this.oauthClient.setCredentials(token);
-
       if (this.isTokenExpired(token)) {
-        // refresh token
         await this.refreshToken();
       }
+      return this.oauthClient;
     }
 
-    return this.oauthClient;
+    throw new Error(`${this.TOKEN_PATH} does not exist`);
   }
 
   /**
@@ -110,6 +102,7 @@ export class AuthService {
               if (!code) {
                 throw new Error('No authorization code received');
               }
+
               // Exchange code for tokens
               const { tokens } = await client.getToken(code as string);
               client.setCredentials(tokens);

@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { DriveService } from '../services/driveService.js';
 import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';
-import { Config } from '../config/config.js';
+import { config } from '@/config/config.js';
 
 export function downloadCommand(program: Command): void {
   program
@@ -16,7 +16,6 @@ export function downloadCommand(program: Command): void {
     .action(async (fileId, options) => {
       const spinner = createSpinner('Downloading file from Google Drive');
       const driveService = await DriveService.create();
-      const config = new Config();
 
       try {
         // Determine output directory

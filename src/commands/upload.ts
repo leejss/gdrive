@@ -4,8 +4,7 @@ import { DriveService } from '../services/driveService.js';
 import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';
 
-export function uploadCommand(program: Command): void {
-  // Basic upload command
+export function uploadCommand(program: Command) {
   program
     .command('upload [files...]')
     .description('Upload files to Google Drive')
@@ -36,7 +35,6 @@ export function uploadCommand(program: Command): void {
             await driveService.uploadFile(file.name, options.folder);
           }
         }
-
         return;
       }
 

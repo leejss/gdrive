@@ -36,3 +36,5 @@ coverage/
 # Cache
 .npm
 .eslintcache
+
+ignore

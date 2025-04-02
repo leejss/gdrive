@@ -13,7 +13,6 @@ export function listCommand(program: Command): void {
     .option('-t, --type <type>', 'Filter by file type (e.g., document, image, video)')
     .action(async (folder: string, options: { verbose?: boolean; type?: string }) => {
       const spinner = createSpinner('Fetching files from Google Drive');
-
       const driveService = await DriveService.create();
 
       try {

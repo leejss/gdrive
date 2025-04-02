@@ -4,15 +4,22 @@ import * as path from 'path';
 import * as mime from 'mime-types';
 import { AuthService } from './authService.js';
 import { FileInfo } from '../types/fileTypes.js';
+import { config } from '@/config/config.js';
 
 export class DriveService {
   private drive: drive_v3.Drive;
+  private folderId: string | undefined = config.get('defaultFolderId');
+  static instance: DriveService | null = null;
 
   static async create(): Promise<DriveService> {
+    if (this.instance) {
+      return this.instance;
+    }
     const authService = AuthService.create();
     const authClient = await authService.getAuthClient();
     const drive = google.drive({ version: 'v3', auth: authClient });
-    return new DriveService(drive);
+    this.instance = new DriveService(drive);
+    return this.instance;
   }
 
   constructor(drive: drive_v3.Drive) {
@@ -31,10 +38,13 @@ export class DriveService {
     const fileName = path.basename(filePath);
     const mimeType = mime.lookup(filePath) || 'application/octet-stream';
 
+    const targetFolderId = folderId || this.folderId;
+    const parents = targetFolderId ? [targetFolderId] : undefined;
+
     // Prepare request metadata
     const fileMetadata: drive_v3.Schema$File = {
       name: fileName,
-      parents: folderId ? [folderId] : undefined,
+      parents,
     };
 
     // Prepare media
@@ -119,13 +129,8 @@ export class DriveService {
    */
   async listFiles(folderId?: string, fileType?: string): Promise<FileInfo[]> {
     let query = '';
-
-    // Add folder filter if specified
-    if (folderId) {
-      query += `'${folderId}' in parents`;
-    } else {
-      query += "'root' in parents";
-    }
+    const targetFolderId = folderId || this.folderId || 'root';
+    query += `'${targetFolderId}' in parents`;
 
     // Exclude trashed files
     query += ' and trashed = false';
