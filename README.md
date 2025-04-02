@@ -42,7 +42,7 @@ gd-up file.txt
 gd-up file1.txt file2.jpg document.pdf
 
 # Upload to a specific folder in Google Drive
-gd-up --folder "My Folder" file.txt
+gd-up --folderId "1234567890" file.txt
 ```
 
 ### Upload Directories
@@ -52,7 +52,7 @@ gd-up --folder "My Folder" file.txt
 gd-up -d my-directory
 
 # Upload a directory to a specific folder in Google Drive
-gd-up -d my-directory --folder "My Folder"
+gd-up -d my-directory --folderId "1234567890"
 ```
 
 ### List Files and Directories
@@ -62,7 +62,7 @@ gd-up -d my-directory --folder "My Folder"
 gd-up list
 
 # List files in a specific folder
-gd-up list "My Folder"
+gd-up list --folderId "My Folder"
 
 # List with more details
 gd-up list --verbose
@@ -108,7 +108,7 @@ gd-up remove FILE_ID1 FILE_ID2 FILE_ID3
 
 | Option | Alias | Description |
 |--------|-------|-------------|
-| `--folder` | `-f` | Specify the destination folder in Google Drive |
+| `--folderId` | `-f` | Specify the destination folderId in Google Drive |
 | `--name` | `-n` | Specify a custom name for the uploaded file |
 | `--recursive` | `-r` | Upload directories recursively |
 | `--verbose` | `-v` | Show detailed information |
@@ -122,7 +122,7 @@ gd-up remove FILE_ID1 FILE_ID2 FILE_ID3
 
 ```bash
 # Upload multiple files to a specific folder
-gd-up --folder "Work Documents" report.docx presentation.pptx
+gd-up --folderId "Work Documents" report.docx presentation.pptx
 
 # Upload a directory with custom naming
 gd-up -d project-files --name "Project X Files"

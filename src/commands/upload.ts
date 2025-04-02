@@ -8,8 +8,8 @@ export function uploadCommand(program: Command) {
   program
     .command('upload [files...]')
     .description('Upload files to Google Drive')
-    .option('-f, --folder <folder>', 'Destination folder in Google Drive')
-    .action(async (files: string[], options: { folder?: string }) => {
+    .option('-f, --folderId <folderId>', 'Destination folder in Google Drive')
+    .action(async (files: string[], options: { folderId?: string }) => {
       if (files.length === 0) {
         logger.error('No files specified for upload');
         return;
@@ -30,9 +30,9 @@ export function uploadCommand(program: Command) {
 
         for (const file of filteredContents) {
           if (file.isDirectory()) {
-            await driveService.uploadDirectory(file.name, options.folder);
+            await driveService.uploadDirectory(file.name, options.folderId);
           } else {
-            await driveService.uploadFile(file.name, options.folder);
+            await driveService.uploadFile(file.name, options.folderId);
           }
         }
         return;
@@ -43,7 +43,7 @@ export function uploadCommand(program: Command) {
       try {
         for (const file of files) {
           spinner.text = `Uploading ${file}...`;
-          await driveService.uploadFile(file, options.folder);
+          await driveService.uploadFile(file, options.folderId);
           logger.success(`Successfully uploaded ${file}`);
         }
         spinner.succeed(`Successfully uploaded ${files.length} file(s)`);
@@ -60,9 +60,9 @@ export function uploadCommand(program: Command) {
     .command('directory <dir>')
     .alias('d')
     .description('Upload a directory to Google Drive')
-    .option('-f, --folder <folderId>', 'Destination folderId in Google Drive')
+    .option('-f, --folderId <folderId>', 'Destination folderId in Google Drive')
     .option('-r, --recursive', 'Upload recursively', true)
-    .action(async (dir: string, options: { folder?: string; recursive?: boolean }) => {
+    .action(async (dir: string, options: { folderId?: string; recursive?: boolean }) => {
       if (!fs.existsSync(dir)) {
         logger.error(`Directory "${dir}" does not exist`);
         return;
@@ -78,7 +78,7 @@ export function uploadCommand(program: Command) {
       const driveService = await DriveService.create();
 
       try {
-        await driveService.uploadDirectory(dir, options.folder, options.recursive);
+        await driveService.uploadDirectory(dir, options.folderId, options.recursive);
         spinner.succeed(`Successfully uploaded directory "${dir}"`);
         process.exit(0);
       } catch (error) {
