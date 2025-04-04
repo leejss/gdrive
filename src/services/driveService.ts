@@ -2,9 +2,9 @@ import { drive_v3, google } from 'googleapis';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mime from 'mime-types';
-import { AuthService } from './authService.js';
 import { FileInfo } from '../types/fileTypes.js';
-import { config } from '@/config/config.js';
+import { config } from '../config/config.js';
+import authService from './authService.js';
 
 export class DriveService {
   private drive: drive_v3.Drive;
@@ -15,7 +15,6 @@ export class DriveService {
     if (this.instance) {
       return this.instance;
     }
-    const authService = AuthService.create();
     const authClient = await authService.getAuthClient();
     const drive = google.drive({ version: 'v3', auth: authClient });
     this.instance = new DriveService(drive);

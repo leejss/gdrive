@@ -1,16 +1,18 @@
 {
-  "name": "gd-up",
+  "name": "gdrive",
   "version": "1.0.0",
   "description": "Google Drive Command Line Uploader",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
+  "type": "module",
   "bin": {
-    "gd-up": "./dist/index.js"
+    "gdrive": "./dist/index.mjs"
   },
   "scripts": {
-    "build": "node build.js",
-    "build:tsc": "tsc",
-    "start": "node dist/index.js",
+    "build": "unbuild",
     "dev": "tsx src/index.ts",
+    "stub": "unbuild --stub",
+    "prepublishOnly": "unbuild",
+    "start": "node dist/index.mjs",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -21,10 +23,10 @@
     "drive",
     "upload",
     "cli",
-    "command-line"
+    "command-line",
+    "gdrive"
   ],
   "author": "leejss",
-  "type": "module",
   "license": "ISC",
   "dependencies": {
     "boxen": "^7.1.1",
@@ -45,7 +47,6 @@
     "@types/node": "^20.10.5",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
-    "esbuild": "^0.25.1",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.2",
@@ -54,7 +55,8 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "unbuild": "^3.5.0"
   },
   "engines": {
     "node": ">=16.0.0"

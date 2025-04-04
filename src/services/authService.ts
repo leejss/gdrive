@@ -1,12 +1,12 @@
-import { OAuth2Client, type Credentials } from 'google-auth-library';
+import { type OAuth2Client, type Credentials } from 'google-auth-library';
+import { google } from 'googleapis';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import * as open from 'open';
 import * as http from 'http';
-// import { Config } from '../config/config.js';
 
-export class AuthService {
+class AuthService {
   private readonly SCOPES = [
     'https://www.googleapis.com/auth/drive',
     'https://www.googleapis.com/auth/drive.file',
@@ -43,7 +43,11 @@ export class AuthService {
       return this.oauthClient;
     }
 
-    this.oauthClient = new OAuth2Client(this.CLIENT_ID, this.CLIENT_SECRET, this.REDIRECT_URI);
+    this.oauthClient = new google.auth.OAuth2(
+      this.CLIENT_ID,
+      this.CLIENT_SECRET,
+      this.REDIRECT_URI
+    );
     if (fs.existsSync(this.TOKEN_PATH)) {
       const token = JSON.parse(fs.readFileSync(this.TOKEN_PATH, 'utf8'));
       this.oauthClient.setCredentials(token);
@@ -202,3 +206,6 @@ export class AuthService {
     return fs.existsSync(this.TOKEN_PATH);
   }
 }
+
+const authService = AuthService.create();
+export default authService;
