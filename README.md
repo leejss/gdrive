@@ -1,4 +1,4 @@
-# gd-up - Google Drive Command Line Helper
+# gdrive - Google Drive Command Line Helper
 
 A command-line tool for interacting with Google Drive, built with TypeScript.
 
@@ -14,18 +14,18 @@ A command-line tool for interacting with Google Drive, built with TypeScript.
 
 ```bash
 # Install globally
-npm install -g gd-up
+npm install -g gdrive
 
 # Or install locally
-npm install gd-up
+npm install gdrive
 ```
 
 ## Setup
 
-Before using gd-up, you need to authenticate with Google Drive:
+Before using gdrive, you need to authenticate with Google Drive:
 
 ```bash
-gd-up auth
+gdrive auth
 ```
 
 This will open a browser window where you can authenticate and authorize the application to access your Google Drive.
@@ -36,72 +36,72 @@ This will open a browser window where you can authenticate and authorize the app
 
 ```bash
 # Upload a single file
-gd-up file.txt
+gdrive file.txt
 
 # Upload multiple files
-gd-up file1.txt file2.jpg document.pdf
+gdrive file1.txt file2.jpg document.pdf
 
 # Upload to a specific folder in Google Drive
-gd-up --folderId "1234567890" file.txt
+gdrive --folderId "1234567890" file.txt
 ```
 
 ### Upload Directories
 
 ```bash
 # Upload a directory recursively
-gd-up -d my-directory
+gdrive -d my-directory
 
 # Upload a directory to a specific folder in Google Drive
-gd-up -d my-directory --folderId "1234567890"
+gdrive -d my-directory --folderId "1234567890"
 ```
 
 ### List Files and Directories
 
 ```bash
 # List files in your Google Drive root
-gd-up list
+gdrive list
 
 # List files in a specific folder
-gd-up list --folderId "My Folder"
+gdrive list --folderId "My Folder"
 
 # List with more details
-gd-up list --verbose
+gdrive list --verbose
 ```
 
 ### Search for Files
 
 ```bash
 # Search for files by name
-gd-up list --search "document"
+gdrive list --search "document"
 
 # Search with file type filter
-gd-up list --search "photo" --type image
+gdrive list --search "photo" --type image
 ```
 
 ### Download Files
 
 ```bash
 # Download a file by ID
-gd-up download FILE_ID
+gdrive download FILE_ID
 
 # Download a file by name
-gd-up download --name "document.pdf"
+gdrive download --name "document.pdf"
 
 # Download to a specific directory
-gd-up download FILE_ID --output ~/Downloads
+gdrive download FILE_ID --output ~/Downloads
 ```
 
 ### Remove Files
 
 ```bash
 # Remove a file by ID
-gd-up remove FILE_ID
+gdrive remove FILE_ID
 
 # Remove a file by name
-gd-up remove --name "document.pdf"
+gdrive remove --name "document.pdf"
 
 # Remove multiple files
-gd-up remove FILE_ID1 FILE_ID2 FILE_ID3
+gdrive remove FILE_ID1 FILE_ID2 FILE_ID3
 ```
 
 ## Options
@@ -122,17 +122,17 @@ gd-up remove FILE_ID1 FILE_ID2 FILE_ID3
 
 ```bash
 # Upload multiple files to a specific folder
-gd-up --folderId "Work Documents" report.docx presentation.pptx
+gdrive --folderId "Work Documents" report.docx presentation.pptx
 
 # Upload a directory with custom naming
-gd-up -d project-files --name "Project X Files"
+gdrive -d project-files --name "Project X Files"
 
 # Search for images and show details
-gd-up list --search "vacation" --type image --verbose
+gdrive list --search "vacation" --type image --verbose
 
 # Download a file to a specific location
-gd-up download 1a2b3c4d5e --output ~/Downloads/important-docs/
+gdrive download 1a2b3c4d5e --output ~/Downloads/important-docs/
 
 # Remove multiple files
-gd-up remove 1a2b3c4d5e 2f3g4h5i6j
+gdrive remove 1a2b3c4d5e 2f3g4h5i6j
 ```
