@@ -8,7 +8,7 @@ import authService from './authService.js';
 
 export class DriveService {
   private drive: drive_v3.Drive;
-  private folderId: string | undefined = config.get('defaultFolderId');
+  private folderId: string | undefined = config.getDefaultFolderId();
   static instance: DriveService | null = null;
 
   static async create(): Promise<DriveService> {
@@ -84,12 +84,13 @@ export class DriveService {
     }
 
     const dirName = path.basename(dirPath);
+    const targetFolderId = parentFolderId || this.folderId;
 
     // Create folder in Google Drive
     const folderMetadata: drive_v3.Schema$File = {
       name: dirName,
       mimeType: 'application/vnd.google-apps.folder',
-      parents: parentFolderId ? [parentFolderId] : undefined,
+      parents: targetFolderId ? [targetFolderId] : undefined,
     };
 
     const folder = await this.drive.files.create({

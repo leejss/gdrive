@@ -104,6 +104,17 @@ gdrive remove --name "document.pdf"
 gdrive remove FILE_ID1 FILE_ID2 FILE_ID3
 ```
 
+## Configuration Management
+
+### View Configuration
+
+```bash
+# Display current configuration
+gdrive show config
+```
+
+The `show config` command displays your current configuration settings in a visually enhanced format. The output is presented in a stylized box with colored text for better readability, showing all configuration properties of the application including authentication details, default folders, and user preferences.
+
 ## Options
 
 | Option | Alias | Description |
