@@ -20,7 +20,8 @@ class AuthService {
   private readonly PORT = 3000;
   private readonly CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
   private readonly CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-  private readonly REDIRECT_URI = `http://localhost:${this.PORT}/oauth2callback`;
+  private CALLBACK_PATH = '/oauth2callback';
+  private readonly REDIRECT_URI = `http://localhost:${this.PORT}${this.CALLBACK_PATH}`;
   private oauthClient: OAuth2Client | null = null;
   static create(): AuthService {
     return new AuthService();
@@ -105,7 +106,7 @@ class AuthService {
           try {
             const reqUrl = req.url || '';
 
-            if (reqUrl.startsWith('/oauth2callback')) {
+            if (reqUrl.startsWith(this.CALLBACK_PATH)) {
               const parsedUrl = new URL(reqUrl, `http://localhost:${this.PORT}`);
               const code = parsedUrl.searchParams.get('code');
 
