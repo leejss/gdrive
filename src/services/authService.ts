@@ -6,6 +6,8 @@ import * as os from 'os';
 import * as open from 'open';
 import * as http from 'http';
 
+const CREDENTIAL_LOCATION = '.gdrive-credentials';
+
 class AuthService {
   private readonly SCOPES = [
     'https://www.googleapis.com/auth/drive',
@@ -13,11 +15,12 @@ class AuthService {
     'https://www.googleapis.com/auth/drive.metadata',
   ];
 
-  private readonly CREDENTIALS_DIR = path.join(os.homedir(), '.gd-up-credentials');
+  private readonly CREDENTIALS_DIR = path.join(os.homedir(), CREDENTIAL_LOCATION);
   private readonly TOKEN_PATH = path.join(this.CREDENTIALS_DIR, 'token.json');
+  private readonly PORT = 3000;
   private readonly CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
   private readonly CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-  private readonly REDIRECT_URI = 'http://localhost:3000/oauth2callback';
+  private readonly REDIRECT_URI = `http://localhost:${this.PORT}/oauth2callback`;
   private oauthClient: OAuth2Client | null = null;
   static create(): AuthService {
     return new AuthService();
@@ -48,16 +51,20 @@ class AuthService {
       this.CLIENT_SECRET,
       this.REDIRECT_URI
     );
+
     if (fs.existsSync(this.TOKEN_PATH)) {
-      const token = JSON.parse(fs.readFileSync(this.TOKEN_PATH, 'utf8'));
+      // const token = JSON.parse(fs.readFileSync(this.TOKEN_PATH, 'utf8'));
+      const token = this.loadToken();
       this.oauthClient.setCredentials(token);
+
       if (this.isTokenExpired(token)) {
         await this.refreshToken();
       }
+
       return this.oauthClient;
     }
 
-    throw new Error(`${this.TOKEN_PATH} does not exist`);
+    return this.oauthClient;
   }
 
   /**
@@ -68,10 +75,9 @@ class AuthService {
 
     try {
       await client.getAccessToken();
-      console.log('이미 인증되어 있습니다.');
       return;
     } catch (error) {
-      console.log("Token is invalid or doesn't exist, continue with auth flow");
+      console.log('No token found, starting authentication process...');
     }
 
     // Generate auth URL
@@ -100,7 +106,7 @@ class AuthService {
             const reqUrl = req.url || '';
 
             if (reqUrl.startsWith('/oauth2callback')) {
-              const parsedUrl = new URL(reqUrl, `http://localhost`);
+              const parsedUrl = new URL(reqUrl, `http://localhost:${this.PORT}`);
               const code = parsedUrl.searchParams.get('code');
 
               if (!code) {
@@ -112,7 +118,7 @@ class AuthService {
               client.setCredentials(tokens);
 
               // Save token
-              fs.writeFileSync(this.TOKEN_PATH, JSON.stringify(tokens));
+              this.saveToken(tokens);
 
               // Send success response
               res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -163,8 +169,7 @@ class AuthService {
         }
       );
 
-      // TODO: get port from redirect uri
-      server.listen(3000, () => {
+      server.listen(this.PORT, () => {
         console.log('Waiting for authentication response...');
       });
 
@@ -188,6 +193,18 @@ class AuthService {
     }
 
     fs.writeFileSync(this.TOKEN_PATH, JSON.stringify(credentials, null, 2));
+  }
+
+  private loadToken(): Credentials {
+    if (fs.existsSync(this.TOKEN_PATH)) {
+      return JSON.parse(fs.readFileSync(this.TOKEN_PATH, 'utf8'));
+    }
+
+    throw new Error(`Token file not found at ${this.TOKEN_PATH}`);
+  }
+
+  private saveToken(token: Credentials): void {
+    fs.writeFileSync(this.TOKEN_PATH, JSON.stringify(token));
   }
 
   /**

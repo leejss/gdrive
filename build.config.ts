@@ -13,9 +13,10 @@ export default defineBuildConfig({
       minify: process.env.NODE_ENV === 'production',
     },
   },
-  hooks: {
-    'build:done'() {
-      execSync('chmod 755 dist/index.mjs');
-    },
-  },
+
+  // hooks: {
+  //   'build:done'() {
+  //     execSync('chmod 755 dist/index.mjs');
+  //   },
+  // },
 });

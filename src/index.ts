@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import './bootstrap.js';
 import { Command, program } from 'commander';
 import { uploadCommand } from './commands/upload.js';
@@ -8,8 +9,10 @@ import { removeCommand } from './commands/remove.js';
 import { showCommand } from './commands/show.js';
 
 program.name('gdrive').description('Google Drive Command Line Uploader').version('1.0.0');
+
 registerCommands(program);
 program.parse(process.argv);
+
 if (process.argv.length === 2) {
   program.outputHelp();
 }

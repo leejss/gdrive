@@ -20,10 +20,11 @@ export function authCommand(program: Command): void {
 
         spinner.succeed('Authentication successful');
         logger.info('You are now authenticated with Google Drive');
+        process.exit(0);
       } catch (error) {
         spinner.fail('Authentication failed');
         logger.error(error instanceof Error ? error.message : String(error));
-        logger.info('Please try again or check your internet connection');
+        process.exit(1);
       }
     });
 
