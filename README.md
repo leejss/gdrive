@@ -111,9 +111,30 @@ gdrive remove FILE_ID1 FILE_ID2 FILE_ID3
 ```bash
 # Display current configuration
 gdrive show config
+
+# Display current default folder information
+gdrive show folder
 ```
 
 The `show config` command displays your current configuration settings in a visually enhanced format. The output is presented in a stylized box with colored text for better readability, showing all configuration properties of the application including authentication details, default folders, and user preferences.
+
+### Manage Default Folder
+
+```bash
+# Set default folder ID
+gdrive config set-folder FOLDER_ID
+
+# Set default folder ID interactively (will prompt for input)
+gdrive config set-folder
+
+# Set default folder ID temporarily (for current session only)
+gdrive config set-folder FOLDER_ID --temp
+
+# Clear default folder ID setting
+gdrive config clear-folder
+```
+
+Setting a default folder ID allows you to upload files without specifying the `--folderId` option each time. The folder ID is validated before being set, ensuring it exists and is actually a folder.
 
 ## Options
 

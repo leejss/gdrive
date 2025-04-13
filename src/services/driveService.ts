@@ -26,6 +26,27 @@ export class DriveService {
   }
 
   /**
+   * 현재 사용 중인 기본 폴더 ID 가져오기
+   */
+  getCurrentFolderId(): string | undefined {
+    return this.folderId;
+  }
+
+  /**
+   * 기본 폴더 ID 설정하기
+   * @param folderId 새 폴더 ID
+   * @param persistent 영구 저장 여부 (기본값: true)
+   */
+  setDefaultFolderId(folderId: string, persistent: boolean = true): void {
+    this.folderId = folderId;
+
+    // 설정에도 저장
+    if (persistent) {
+      config.setConfig('DEFAULT_FOLDER_ID', folderId, persistent);
+    }
+  }
+
+  /**
    * Upload a file to Google Drive
    */
   async uploadFile(filePath: string, folderId?: string): Promise<string> {
