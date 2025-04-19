@@ -1,15 +1,14 @@
 import { type Command } from 'commander';
 import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';
-import authService from '../services/authService.js';
+import type { AuthService } from '../services/authService.js';
 
-export function authCommand(program: Command): void {
+export function authCommand(program: Command, authService: AuthService): void {
   program
     .command('auth')
     .description('Authenticate with Google Drive')
     .action(async () => {
       const spinner = createSpinner('Opening browser for authentication...');
-
       try {
         await Promise.race([
           authService.authenticate(),

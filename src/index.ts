@@ -8,9 +8,10 @@ import { authCommand } from './commands/auth.js';
 import { removeCommand } from './commands/remove.js';
 import { showCommand } from './commands/show.js';
 import { configCommand } from './commands/config.js';
-import { CONFIG_FILE, initializeConfig } from './config.js';
+import { CONFIG_FILE, getConfig, initializeConfig } from './config.js';
 import * as fs from 'fs';
 import inquirer from 'inquirer';
+import { AuthService } from './services/authService.js';
 
 function isFirstRun() {
   return !fs.existsSync(CONFIG_FILE);
@@ -80,7 +81,10 @@ async function initialize(program: Command) {
     initializeConfig(config);
   }
 
-  authCommand(program);
+  const config = getConfig();
+  const authService = AuthService.create({ config });
+  authCommand(program, authService);
+
   uploadCommand(program);
   listCommand(program);
   downloadCommand(program);

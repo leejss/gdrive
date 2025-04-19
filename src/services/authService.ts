@@ -2,47 +2,37 @@ import { type OAuth2Client, type Credentials } from 'google-auth-library';
 import { google } from 'googleapis';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 import * as open from 'open';
 import * as http from 'http';
+import { CONFIG_PATH, type Config } from '../config.js';
 
-const CREDENTIAL_LOCATION = '.gdrive-credentials';
-
-class AuthService {
+export class AuthService {
   private readonly SCOPES = [
     'https://www.googleapis.com/auth/drive',
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/drive.metadata',
   ];
-
-  private readonly CREDENTIALS_DIR = path.join(os.homedir(), CREDENTIAL_LOCATION);
-  private readonly TOKEN_PATH = path.join(this.CREDENTIALS_DIR, 'token.json');
+  private readonly TOKEN_PATH = path.join(CONFIG_PATH, 'gdrive-token.json');
   private readonly PORT = 3000;
-  private readonly CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-  private readonly CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+  private readonly CLIENT_ID: string;
+  private readonly CLIENT_SECRET: string;
   private CALLBACK_PATH = '/oauth2callback';
   private readonly REDIRECT_URI = `http://localhost:${this.PORT}${this.CALLBACK_PATH}`;
   private oauthClient: OAuth2Client | null = null;
   private static instance: AuthService | null = null;
 
-  static create(): AuthService {
+  static create({ config }: { config: Config }): AuthService {
     if (this.instance) {
       return this.instance;
     }
-    this.instance = new AuthService();
+
+    this.instance = new AuthService({ config });
     return this.instance;
   }
 
-  constructor() {
-    // Ensure credentials directory exists
-    if (!fs.existsSync(this.CREDENTIALS_DIR)) {
-      fs.mkdirSync(this.CREDENTIALS_DIR, { recursive: true });
-    }
-
-    // check env variables
-    if (!this.CLIENT_ID || !this.CLIENT_SECRET) {
-      throw new Error('CLIENT_ID and CLIENT_SECRET must be set');
-    }
+  constructor({ config }: { config: Config }) {
+    this.CLIENT_ID = config.getClientId();
+    this.CLIENT_SECRET = config.getClientSecret();
   }
 
   /**
@@ -66,10 +56,8 @@ class AuthService {
       if (this.isTokenExpired(token)) {
         await this.refreshToken();
       }
-
       return this.oauthClient;
     }
-
     return this.oauthClient;
   }
 
@@ -229,6 +217,3 @@ class AuthService {
     return fs.existsSync(this.TOKEN_PATH);
   }
 }
-
-const authService = AuthService.create();
-export default authService;

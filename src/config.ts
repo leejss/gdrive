@@ -29,8 +29,7 @@ const ConfigSchema = z.object({
 
 type ConfigValues = z.infer<typeof ConfigSchema>;
 
-// loadConfig, saveConfig, getConfig
-class Config {
+export class Config {
   private static instance: Config | null = null;
   private configValues: ConfigValues = {} as ConfigValues;
   private initialized: boolean = false;
@@ -146,89 +145,26 @@ class Config {
     }
   }
 
-  /**
-   * 기본 폴더 ID 설정 가져오기
-   * 환경변수 > 설정 파일 > undefined 순으로 확인
-   */
-  getDefaultFolderId(): string | undefined {
-    return process.env[ENV_KEYS.DEFAULT_FOLDER_ID] || this.configValues.defaultFolderId;
+  public getClientId(): string {
+    return this.configValues.clientId;
   }
 
-  /**
-   * 기본 다운로드 위치 가져오기
-   * 환경변수 > 설정 파일 > 기본값 순으로 확인
-   */
-  getDefaultDownloadLocation(): string {
-    return (
-      process.env[ENV_KEYS.DEFAULT_DOWNLOAD_LOCATION] ||
-      this.configValues.defaultDownloadLocation ||
-      DEFAULT_VALUES.DEFAULT_DOWNLOAD_LOCATION
-    );
-  }
-
-  /**
-   * 상세 로깅 설정 가져오기
-   * 환경변수 > 설정 파일 > 기본값 순으로 확인
-   */
-  isVerbose(): boolean {
-    const verboseEnv = process.env[ENV_KEYS.VERBOSE];
-    if (verboseEnv !== undefined) {
-      return verboseEnv.toLowerCase() === 'true';
-    }
-    return this.configValues.verbose !== undefined
-      ? this.configValues.verbose
-      : DEFAULT_VALUES.VERBOSE;
-  }
-
-  /**
-   * 설정값 저장하기
-   * 환경변수와 설정 파일에 모두 저장
-   * @param key 설정 키
-   * @param value 설정 값
-   * @param persistent 영구 저장 여부 (기본값: true)
-   */
-  setConfig(key: keyof typeof ENV_KEYS, value: string | boolean, persistent: boolean = true): void {
-    // 환경변수에 저장 (런타임)
-    if (typeof value === 'boolean') {
-      process.env[ENV_KEYS[key]] = value.toString();
-    } else {
-      process.env[ENV_KEYS[key]] = value;
-    }
-
-    // 설정 파일에 저장 (영구)
-    if (persistent) {
-      const configKey = key.charAt(0).toLowerCase() + key.slice(1);
-      this.configValues[configKey as keyof ConfigValues] = value as any;
-      this.saveConfig();
-      console.log(`설정 ${key}가 ${value}로 변경되었습니다 (영구 저장됨)`);
-    } else {
-      console.log(`설정 ${key}가 ${value}로 변경되었습니다 (런타임에만 유효)`);
-    }
-  }
-
-  getAllConfig(): Record<string, string | boolean | undefined> {
-    return {
-      defaultFolderId: this.getDefaultFolderId(),
-      defaultDownloadLocation: this.getDefaultDownloadLocation(),
-      verbose: this.isVerbose(),
-    };
+  public getClientSecret(): string {
+    return this.configValues.clientSecret;
   }
 }
 
-// 싱글턴 인스턴스 가져오기 함수 내보내기
 export const getConfig = (): Config => {
   return Config.getInstance();
 };
 
-// 설정 초기화 함수 내보내기
 export const initializeConfig = (configValues: {
   clientId: string;
   clientSecret: string;
   defaultFolderId: string;
   defaultDownloadLocation?: string;
   verbose?: boolean;
-}): Config => {
+}) => {
   const config = Config.getInstance();
   config.initialize(configValues);
-  return config;
 };
