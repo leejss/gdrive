@@ -4,7 +4,7 @@ import { DriveService } from '../services/driveService.js';
 import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';
 
-export function uploadCommand(program: Command) {
+export function uploadCommand(program: Command, driveService: DriveService) {
   program
     .command('upload [files...]')
     .description('Upload files to Google Drive')
@@ -14,8 +14,6 @@ export function uploadCommand(program: Command) {
         logger.error('No files specified for upload');
         return;
       }
-
-      const driveService = await DriveService.create();
 
       if (files.length === 1 && (files[0] === '.' || files[0] === './')) {
         const currentDir = process.cwd();
@@ -74,9 +72,6 @@ export function uploadCommand(program: Command) {
       }
 
       const spinner = createSpinner(`Uploading directory "${dir}" to Google Drive`);
-
-      const driveService = await DriveService.create();
-
       try {
         await driveService.uploadDirectory(dir, options.folderId, options.recursive);
         spinner.succeed(`Successfully uploaded directory "${dir}"`);

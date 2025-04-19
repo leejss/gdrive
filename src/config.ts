@@ -87,7 +87,7 @@ export class Config {
     try {
       const validated = this.validateConfig(configValues);
       this.configValues = validated;
-      this.saveConfig();
+      this.writeConfig();
       this.initialized = true;
       console.log('설정이 성공적으로 초기화되었습니다.');
     } catch (error) {
@@ -134,15 +134,18 @@ export class Config {
     }
   }
 
-  private saveConfig() {
+  private writeConfig() {
     try {
-      // 디렉토리는 이미 생성되어 있으므로 파일만 저장
       fs.writeFileSync(CONFIG_FILE, JSON.stringify(this.configValues, null, 2));
-      return this.configValues;
     } catch (error) {
       console.error('설정 파일을 저장하는 중 오류가 발생했습니다:', error);
       throw error;
     }
+  }
+
+  public setConfig<K extends keyof ConfigValues>(key: K, value: ConfigValues[K]): void {
+    this.configValues[key] = value;
+    this.writeConfig();
   }
 
   public getClientId(): string {
@@ -151,6 +154,18 @@ export class Config {
 
   public getClientSecret(): string {
     return this.configValues.clientSecret;
+  }
+
+  public getDefaultFolderId(): string {
+    return this.configValues.defaultFolderId;
+  }
+
+  public getDefaultDownloadLocation(): string {
+    return this.configValues.defaultDownloadLocation;
+  }
+
+  public getAllConfig(): ConfigValues {
+    return this.configValues;
   }
 }
 

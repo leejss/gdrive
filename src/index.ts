@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-import './bootstrap.js';
 import { Command, program } from 'commander';
 import { uploadCommand } from './commands/upload.js';
 import { listCommand } from './commands/list.js';
@@ -7,17 +5,23 @@ import { downloadCommand } from './commands/download.js';
 import { authCommand } from './commands/auth.js';
 import { removeCommand } from './commands/remove.js';
 import { showCommand } from './commands/show.js';
-import { configCommand } from './commands/config.js';
 import { CONFIG_FILE, getConfig, initializeConfig } from './config.js';
 import * as fs from 'fs';
 import inquirer from 'inquirer';
 import { AuthService } from './services/authService.js';
+import { DriveService } from './services/driveService.js';
 
-function isFirstRun() {
+function checkFirstRun() {
   return !fs.existsSync(CONFIG_FILE);
 }
 
-async function promptConfig() {
+async function promptConfig(): Promise<{
+  clientId: string;
+  clientSecret: string;
+  defaultFolderId: string;
+  defaultDownloadLocation?: string;
+  verbose?: boolean;
+}> {
   console.log('구글 드라이브 API 접근을 위한 설정이 필요합니다.');
   console.log('Google Cloud 콘솔에서 OAuth 2.0 클라이언트 ID와 비밀번호를 생성하세요.');
   console.log(
@@ -75,34 +79,42 @@ async function promptConfig() {
 }
 
 async function initialize(program: Command) {
-  if (isFirstRun()) {
-    console.log('First run detected. Please initialize the configuration.');
-    const config = await promptConfig();
-    initializeConfig(config);
+  const isFirstRun = checkFirstRun();
+  if (isFirstRun) {
+    const configValues = await promptConfig();
+    initializeConfig(configValues);
   }
 
   const config = getConfig();
   const authService = AuthService.create({ config });
-  authCommand(program, authService);
 
-  uploadCommand(program);
-  listCommand(program);
-  downloadCommand(program);
-  removeCommand(program);
-  showCommand(program);
-  configCommand(program);
+  if (isFirstRun) {
+    await authService.authenticate();
+  }
+
+  const driveService = await DriveService.create({
+    authClient: await authService.getAuthClient(),
+    config,
+  });
+
+  authCommand(program, authService);
+  uploadCommand(program, driveService);
+  listCommand(program, driveService);
+  downloadCommand(program, driveService);
+  removeCommand(program, driveService);
+  showCommand(program, driveService);
+
+  // configCommand(program);
 }
 
 function main() {
   program.name('gdrive').description('Google Drive Command Line Uploader').version('1.0.0');
-  if (process.argv.length === 2) {
-    program.outputHelp();
-  }
+
+  // if (process.argv.length === 2) {
+  //   program.outputHelp();
+  // }
 
   program.parse(process.argv);
-
-  // check first run
-
   initialize(program);
 }
 

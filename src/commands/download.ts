@@ -4,9 +4,9 @@ import * as fs from 'fs';
 import { DriveService } from '../services/driveService.js';
 import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';
-import { config } from '../config.js';
+import { getConfig } from '../config.js';
 
-export function downloadCommand(program: Command): void {
+export function downloadCommand(program: Command, driveService: DriveService): void {
   program
     .command('get <fileId>')
     .alias('g')
@@ -15,11 +15,10 @@ export function downloadCommand(program: Command): void {
     .option('-n, --name <name>', 'Save the file with a different name')
     .action(async (fileId, options) => {
       const spinner = createSpinner('Downloading file from Google Drive');
-      const driveService = await DriveService.create();
 
       try {
-        // Determine output directory
-        let outputDir = options.output || config.get('defaultDownloadLocation') || process.cwd();
+        const config = getConfig();
+        let outputDir = options.output || config.getDefaultDownloadLocation() || process.cwd();
         outputDir = path.resolve(outputDir);
 
         // Create output directory if it doesn't exist

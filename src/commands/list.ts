@@ -4,7 +4,7 @@ import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';
 import { formatFileList } from '../utils/formatter.js';
 
-export function listCommand(program: Command): void {
+export function listCommand(program: Command, driveService: DriveService): void {
   program
     .command('list [folder]')
     .alias('ls')
@@ -13,7 +13,6 @@ export function listCommand(program: Command): void {
     .option('-t, --type <type>', 'Filter by file type (e.g., document, image, video)')
     .action(async (folder: string, options: { verbose?: boolean; type?: string }) => {
       const spinner = createSpinner('Fetching files from Google Drive');
-      const driveService = await DriveService.create();
 
       try {
         const files = await driveService.listFiles(folder, options.type);

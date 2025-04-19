@@ -1,18 +1,19 @@
 import { Command } from 'commander';
-import { config } from '../config.js';
 import { DriveService } from '../services/driveService.js';
 import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';
 import chalk from 'chalk';
 import boxen from 'boxen';
+import { getConfig } from '../config.js';
 
-export function showCommand(program: Command): void {
+export function showCommand(program: Command, driveService: DriveService): void {
   const showCommand = program.command('show').description('Display information');
 
   showCommand
     .command('config')
     .description('Display configuration')
     .action(() => {
+      const config = getConfig();
       const allConfig = config.getAllConfig();
 
       // Format config object to string with color highlighting
@@ -43,9 +44,7 @@ export function showCommand(program: Command): void {
       const spinner = createSpinner('Fetching folder information');
 
       try {
-        const driveService = await DriveService.create();
         const folderId = driveService.getCurrentFolderId();
-
         if (!folderId) {
           spinner.succeed('No default folder is set');
           logger.info('You can set a default folder using the "config set-folder" command');

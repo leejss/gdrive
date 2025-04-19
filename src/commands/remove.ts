@@ -4,15 +4,13 @@ import { DriveService } from '../services/driveService.js';
 import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';
 
-export function removeCommand(program: Command): void {
+export function removeCommand(program: Command, driveService: DriveService): void {
   program
     .command('remove <fileId>')
     .alias('rm')
     .description('Remove a file from Google Drive')
     .option('-f, --force', 'Skip confirmation', false)
     .action(async (fileId, options) => {
-      const driveService = await DriveService.create();
-
       try {
         // Get file details
         const spinner = createSpinner('Getting file information');

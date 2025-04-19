@@ -25,7 +25,6 @@ export class AuthService {
     if (this.instance) {
       return this.instance;
     }
-
     this.instance = new AuthService({ config });
     return this.instance;
   }
@@ -34,10 +33,6 @@ export class AuthService {
     this.CLIENT_ID = config.getClientId();
     this.CLIENT_SECRET = config.getClientSecret();
   }
-
-  /**
-   * Get OAuth2 client
-   */
   async getAuthClient(): Promise<OAuth2Client> {
     if (this.oauthClient) {
       return this.oauthClient;

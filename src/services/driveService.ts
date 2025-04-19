@@ -3,26 +3,38 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as mime from 'mime-types';
 import { FileInfo } from '../types/fileTypes.js';
-import { config } from '../config.js';
-import authService from './authService.js';
+import type { Config } from '../config.js';
+import type { OAuth2Client } from 'google-auth-library';
 
 export class DriveService {
   private drive: drive_v3.Drive;
-  private folderId: string | undefined = config.getDefaultFolderId();
+  private folderId: string;
+  private config: Config;
   static instance: DriveService | null = null;
 
-  static async create(): Promise<DriveService> {
+  static async create({
+    authClient,
+    config,
+  }: {
+    authClient: OAuth2Client;
+    config: Config;
+  }): Promise<DriveService> {
     if (this.instance) {
       return this.instance;
     }
-    const authClient = await authService.getAuthClient();
     const drive = google.drive({ version: 'v3', auth: authClient });
-    this.instance = new DriveService(drive);
+    this.instance = new DriveService({
+      drive,
+      config,
+    });
+
     return this.instance;
   }
 
-  constructor(drive: drive_v3.Drive) {
+  constructor({ drive, config }: { drive: drive_v3.Drive; config: Config }) {
     this.drive = drive;
+    this.config = config;
+    this.folderId = config.getDefaultFolderId();
   }
 
   /**
@@ -35,15 +47,10 @@ export class DriveService {
   /**
    * 기본 폴더 ID 설정하기
    * @param folderId 새 폴더 ID
-   * @param persistent 영구 저장 여부 (기본값: true)
    */
-  setDefaultFolderId(folderId: string, persistent: boolean = true): void {
+  setDefaultFolderId(folderId: string): void {
     this.folderId = folderId;
-
-    // 설정에도 저장
-    if (persistent) {
-      config.setConfig('DEFAULT_FOLDER_ID', folderId, persistent);
-    }
+    this.config.setConfig('defaultFolderId', folderId);
   }
 
   /**
@@ -83,7 +90,6 @@ export class DriveService {
     if (!response.data.id) {
       throw new Error('Failed to upload file: No file ID returned');
     }
-
     return response.data.id;
   }
 
