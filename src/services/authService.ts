@@ -23,8 +23,14 @@ class AuthService {
   private CALLBACK_PATH = '/oauth2callback';
   private readonly REDIRECT_URI = `http://localhost:${this.PORT}${this.CALLBACK_PATH}`;
   private oauthClient: OAuth2Client | null = null;
+  private static instance: AuthService | null = null;
+
   static create(): AuthService {
-    return new AuthService();
+    if (this.instance) {
+      return this.instance;
+    }
+    this.instance = new AuthService();
+    return this.instance;
   }
 
   constructor() {
@@ -54,7 +60,6 @@ class AuthService {
     );
 
     if (fs.existsSync(this.TOKEN_PATH)) {
-      // const token = JSON.parse(fs.readFileSync(this.TOKEN_PATH, 'utf8'));
       const token = this.loadToken();
       this.oauthClient.setCredentials(token);
 

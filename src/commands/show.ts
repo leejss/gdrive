@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { config } from '../config/config.js';
+import { config } from '../config.js';
 import { DriveService } from '../services/driveService.js';
 import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';

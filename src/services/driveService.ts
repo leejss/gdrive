@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as mime from 'mime-types';
 import { FileInfo } from '../types/fileTypes.js';
-import { config } from '../config/config.js';
+import { config } from '../config.js';
 import authService from './authService.js';
 
 export class DriveService {

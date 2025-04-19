@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { DriveService } from '../services/driveService.js';
 import { logger } from '../utils/logger.js';
 import { createSpinner } from '../utils/spinner.js';
-import { config } from '../config/config.js';
+import { config } from '../config.js';
 
 export function downloadCommand(program: Command): void {
   program
